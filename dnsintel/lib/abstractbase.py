@@ -95,11 +95,10 @@ class AbstractBase(object):
                     continue
                 if len(temp) == self.CHUNK_SIZE:
                     self.db.query_add_many(temp)
-                    append_to_blacklist(temp)
                     temp.clear()
                 temp.append(item)
         if temp:
-            append_to_blacklist(temp)
+            self.db.query_add_many(temp)
 
     @abc.abstractmethod
     def transform(self, path: str, type=""):

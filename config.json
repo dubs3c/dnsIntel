@@ -6,8 +6,7 @@
             "MalwareDomains": {
                 "URL": "http://mirror1.malwaredomains.com/files/domains.txt",
                 "DESCRIPTION": "The DNS-BH project creates and maintains a listing of domains that are known to be used to propagate malware and spyware.",
-                "ENABLED": true,
-                "FORMAT": "DNSMASQ"
+                "ENABLED": true
             },
             "DisconnectMe": {
                 "URLS": [
@@ -25,14 +24,12 @@
                     }
                 ],
                 "DESCRIPTION": "Collection of bad domains from Disconnect.me",
-                "ENABLED": true,
-                "FORMAT": "DNSMASQ"
+                "ENABLED": true
             },
             "Zeustracker": {
                 "URL": "https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
                 "DESCRIPTION": "Zeustracker",
-                "ENABLED": true,
-                "FORMAT": "DNSMASQ"
+                "ENABLED": true
             }
         }
     ]

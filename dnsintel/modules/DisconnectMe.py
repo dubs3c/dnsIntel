@@ -7,7 +7,6 @@ class Module(AbstractBase):
 
     def __init__(self):
         super().__init__()
-        self.FORMAT = ""
 
     def transform(self, path: str, type=""):
         try:
