@@ -6,7 +6,7 @@ from typing import List, Dict, Tuple, Generator, NamedTuple
 import click
 from dnsintel.util.sql import SQL
 from dnsintel.util.config import Config
-from dnsintel.util.util import download, add_to_blacklist, multi_download
+from dnsintel.util.util import download, append_to_blacklist, multi_download
 from logzero import logger
 
 class AbstractBase(object):
@@ -95,11 +95,11 @@ class AbstractBase(object):
                     continue
                 if len(temp) == self.CHUNK_SIZE:
                     self.db.query_add_many(temp)
-                    add_to_blacklist(temp)
+                    append_to_blacklist(temp)
                     temp.clear()
                 temp.append(item)
         if temp:
-            add_to_blacklist(temp)
+            append_to_blacklist(temp)
 
     @abc.abstractmethod
     def transform(self, path: str, type=""):

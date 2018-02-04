@@ -1,5 +1,6 @@
 from dnsintel.util.config import Config
 from dnsintel.util.sql import SQL
+from dnsintel.util.util import reload_blacklist_file, restart_dnsmasq
 import logging
 import logzero
 from logzero import logger
@@ -9,11 +10,12 @@ import click
 @click.option("-l", "--loglevel", help="Set loglevel", type=click.Choice(['DEBUG']))
 @click.option("-m", "--module", help="Run specific module")
 @click.option("-f","--force", default=False, help="Force download previously downloaded files", is_flag=True)
+@click.option("-g", "--format", help="Which DNS format to use", type=click.Choice(['DNSMASQ', 'BIND']))
 @click.version_option(version="0.5", prog_name="dnsIntel")
 @click.pass_context
-def main(ctx, loglevel, module, force):
+def main(ctx, loglevel, module, force, format):
     """dnsIntel downloads and parses a list of domains from popular threat intel sources,
-    then transforms the list into a blacklist which can be used by dnsmasq and BIND.\n\n-== Made by @mjdubell ==-"""
+then transforms the list into a blacklist which can be used by Dnsmasq and BIND.\n\n-== Made by @mjdubell ==-"""
     ctx.obj = Config()
 
     if loglevel == "DEBUG":
@@ -23,6 +25,7 @@ def main(ctx, loglevel, module, force):
 
     ctx.obj.selected_module = module
     ctx.obj.force = force
+    ctx.obj.FORMAT = format
 
 @main.command('run', short_help='Run the application')
 @click.pass_obj
@@ -64,6 +67,35 @@ def run(ctx):
             module.db.disconnect()
 
     click.secho("[+] dnsIntel Completed", fg='yellow')
+
+
+@main.command("reload-blacklist", short_help="Reload the blacklist with domains in DB")
+@click.pass_obj
+def reload_blacklist(ctx):
+    if ctx.FORMAT:
+        click.secho("[!] Reloading the blacklist file...", fg="green")
+        sql = SQL()
+        sql.connect()
+        domains = sql.get_all_domains(ctx.FORMAT)
+        reload_blacklist_file(domains)
+        sql.disconnect()
+    else:
+        click.secho("[*] You need to specify which format you want, --format")
+
+    click.secho("[+] Reload Complete", fg='yellow')
+
+
+@main.command("restart-dnsmasq", short_help="Restart the DNSMASQ service")
+@click.pass_obj
+def reload_dnsmasq(ctx):
+    # TODO - FIX THIS
+    click.secho("[!] Trying to restart Dnsmasq...", fg="green")
+    status = restart_dnsmasq()
+    if status:
+        click.secho("[+] Dnsmasq has been restarted!", fg="yellow")
+    else:
+        click.secho("[-] Could not restart Dnsmasq", fg="red")
+
 
 if __name__ == '__main__':
     main()

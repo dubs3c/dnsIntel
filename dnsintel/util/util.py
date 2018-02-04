@@ -5,11 +5,9 @@ import collections
 import os
 import time
 import subprocess
-from typing import List, Dict, NamedTuple
-
-from .config import Config
-
+from typing import List, Dict, NamedTuple, Generator
 from logzero import logger
+from .config import Config
 
 config = Config()
 
@@ -60,9 +58,10 @@ def get_timestamp() -> str:
 def dnsmasq(domain: str) -> str:
     """
     Return a domain in dnsmasq format
-    :param domain:
+    :param domain: domain
     :return: dnsmasq address block
     """
+    domain = domain.replace("\n", "")
     return f'address=/{domain}/{config.BLACKHOLE}\n'
 
 
@@ -70,10 +69,10 @@ def bind(domain: str) -> str:
     pass
 
 
-def add_to_blacklist(domains: List):
+def append_to_blacklist(domains: List):
     """
-    Add a list of domains to the blacklist file
-    :param domains: List of domains
+    Appends a list of domains to the blacklist file
+    :param domains: List of DomainIntel objects
     """
     with open(config.BLACKLIST_FILE, "a") as f:
         f.write("".join([x.domain_formated for x in domains]))
@@ -85,9 +84,22 @@ def restart_dnsmasq():
     :return:
     """
     try:
-        subprocess.run(["systemctl", "restart", "dnsmasq"])
+        status = subprocess.run(["sudo", "systemctl", "restart", "dnsmasq"], check=True)
     except Exception as e:
         logger.error(f"Could not restart dnsmasq: {e}")
+        quit()
+    return status
+
+
+def reload_blacklist_file(generator: Generator):
+    """
+    Saves the content of the generator to the blacklist file. generator is a DomainIntel Object.
+    :param generator: DomainIntel generator object
+    """
+    if os.path.exists(config.BLACKLIST_FILE):
+        os.remove(config.BLACKLIST_FILE)
+    for gen in generator:
+        append_to_blacklist(gen)
 
 
 def restart_bind():
@@ -96,7 +108,9 @@ def restart_bind():
     :return:
     """
     try:
-        subprocess.run(["systemctl", "restart", "named"])
+        status = subprocess.run(["sudo", "systemctl", "restart", "named"], check=True)
     except Exception as e:
         logger.error(f"Could not restart bind: {e}")
+        quit()
+    return status
 

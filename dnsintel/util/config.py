@@ -14,6 +14,7 @@ class Config(object):
         self.modules_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'modules'))
         self.force = False
         self.selected_module = ""
+        self.FORMAT = ""
 
         if not os.path.exists(self.path):
             print("config file does not exists")

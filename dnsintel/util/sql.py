@@ -1,7 +1,7 @@
 import sqlite3
 import time
 import os
-from typing import List, Dict
+from typing import List, Dict, Generator
 from logzero import logger
 from dnsintel.lib.domainintel import DomainIntel
 
@@ -86,6 +86,21 @@ class SQL:
                     "created": row["created"]}
         else:
             return {}
+
+    def get_all_domains(self, format="") -> Generator:
+        self.cursor.execute("SELECT domain, type, reference, created FROM malware_domains")
+        while True:
+            try:
+                items = self.cursor.fetchmany(size=1000)
+            except StopIteration:
+                break
+            else:
+                if items:
+                    domains = [DomainIntel(item["domain"], format, item["type"],item["reference"]) for item in items]
+                    yield domains
+                else:
+                    break
+
 
     def query_add(self, domain: str, type: str, reference: str):
         """
