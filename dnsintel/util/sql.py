@@ -8,7 +8,8 @@ from dnsintel.lib.domainintel import DomainIntel
 class SQL:
     """ Class for handling SQLite3 operations """
     def __init__(self):
-        self.DATABASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'db', 'malware_domains.db'))
+        self.DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'db'))
+        self.DATABASE = os.path.abspath(os.path.join(self.DATABASE_PATH, 'malware_domains.db'))
         self.conn = None
         self.cursor = None
 
@@ -17,6 +18,8 @@ class SQL:
         Connect to the sqlite3 database
         :return:
         """
+        if not os.path.exists(self.DATABASE_PATH):
+            os.mkdir(self.DATABASE_PATH)
         self.conn = sqlite3.connect(self.DATABASE)
         self.cursor = self.conn.cursor()
         self.cursor.row_factory = sqlite3.Row
