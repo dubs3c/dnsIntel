@@ -17,20 +17,23 @@ Here are some examples of using dnsIntel.
 Usage: dnsintel.py [OPTIONS] COMMAND [ARGS]...
 
   dnsIntel downloads and parses a list of domains from popular threat intel
-  sources, then transforms the list into a blacklist which can be used
-  by dnsmasq and BIND.
+  sources, then transforms the list into a blacklist which can be used by
+  Dnsmasq and BIND.
 
   -== Made by @mjdubell ==-
 
 Options:
-  -l, --loglevel [DEBUG]  Set loglevel
-  -m, --module TEXT       Run specific module
-  -f, --force             Force download previously downloaded files
-  --version               Show the version and exit.
-  --help                  Show this message and exit.
+  -l, --loglevel [DEBUG]       Set loglevel
+  -m, --module TEXT            Run specific module
+  -f, --force                  Force download previously downloaded files
+  -g, --format [DNSMASQ|BIND]  Which DNS format to use
+  --version                    Show the version and exit.
+  --help                       Show this message and exit.
 
 Commands:
-  run  Run the application
+  reload-blacklist  Reload the blacklist with domains in DB
+  restart-dnsmasq   Restart the DNSMASQ service
+  run               Run the application
 ```
 
 #### Running example
