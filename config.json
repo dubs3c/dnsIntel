@@ -1,0 +1,39 @@
+{
+    "BLACKLIST_FILE": "output/blacklist.txt",
+    "BLACKHOLE": "192.168.10.4",
+    "sources": [
+        {
+            "MalwareDomains": {
+                "URL": "http://mirror1.malwaredomains.com/files/domains.txt",
+                "DESCRIPTION": "The DNS-BH project creates and maintains a listing of domains that are known to be used to propagate malware and spyware.",
+                "ENABLED": true,
+                "FORMAT": "DNSMASQ"
+            },
+            "DisconnectMe": {
+                "URLS": [
+                    {
+                        "URL": "https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt",
+                        "TYPE": "Ads"
+                    },
+                    {
+                        "URL": "https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt",
+                        "TYPE": "Tracking"
+                    },
+                    {
+                        "URL": "https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt",
+                        "TYPE": "Malvertising"
+                    }
+                ],
+                "DESCRIPTION": "Collection of bad domains from Disconnect.me",
+                "ENABLED": true,
+                "FORMAT": "DNSMASQ"
+            },
+            "Zeustracker": {
+                "URL": "https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
+                "DESCRIPTION": "Zeustracker",
+                "ENABLED": true,
+                "FORMAT": "DNSMASQ"
+            }
+        }
+    ]
+}
