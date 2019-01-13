@@ -6,3 +6,4 @@ db/
 *.log
 .DS_Store
 .idea/
+.vscode/

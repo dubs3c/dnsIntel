@@ -26,9 +26,9 @@
                 "DESCRIPTION": "Collection of bad domains from Disconnect.me",
                 "ENABLED": true
             },
-            "Zeustracker": {
+            "ZeusTracker": {
                 "URL": "https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist",
-                "DESCRIPTION": "Zeustracker",
+                "DESCRIPTION": "ZeusTracker",
                 "ENABLED": true
             }
         }

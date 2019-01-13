@@ -12,11 +12,15 @@ class Module(AbstractBase):
         try:
             with open(path, "r") as file:
                 for line in file:
-                    if not line.startswith("##"):
-                        line = line.replace("\r", "").replace("\n", "").replace("#", "")
-                        new_line = [x for x in line.split("\t") if x != '']
-                        domain = MalwareDomains(domain=new_line[0], type=new_line[1], reference=new_line[2])
-                        yield domain
+                    if line.startswith("#"):
+                        continue
+                    if len(line.strip()) == 0 :
+                        continue
+
+                    line = line.replace("\r", "").replace("\n", "")
+                    domain = MalwareDomains(domain=line, type="Zeus", reference="ZeusTracker")
+                    yield domain
+
         except IOError as e:
             logger.error(e)
 

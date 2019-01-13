@@ -12,7 +12,6 @@ class Config(object):
         self._output_location = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '../../', 'output/'))
         self.download_location = os.path.abspath(os.path.join(self._output_location, "download"))
         self.modules_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'modules'))
-        self.force = False
         self.selected_module = ""
         self.FORMAT = ""
 
