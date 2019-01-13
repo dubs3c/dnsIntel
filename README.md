@@ -5,7 +5,7 @@
 The motivation behind dnsIntel was to protect my own network from malvertising and new threats by blocking on the DNS level. I run DNSMASQ in my homelab and needed a way to automatically block new threats, and so dnsIntel was born.
 
 ## How does it work?
-dnsIntel tries to be framework which gives you all the necessary tools in order to write a small script that downloads new domains from any source, and updates your DNS server with new domains to block. The `config.json` contains all configuration and sources from which to download from. Everything is stored in a local sqlite database file. dnsIntel will build a blacklist file containing your blocked doamins according to either DNSMASQ or BIND(planned feature) format.
+dnsIntel tries to be framework which gives you all the necessary tools in order to write a small script that downloads new domains from any source, and updates your DNS server with new domains to block. The `config.json` contains all configuration and sources from which to download from. Everything is stored in a local sqlite database file. dnsIntel will build a blacklist file containing your blocked doamins according to DNSMASQ format.
 
 Scripts/modules can be found in the module folder.
 
@@ -25,8 +25,6 @@ Usage: dnsintel.py [OPTIONS] COMMAND [ARGS]...
 Options:
   -l, --loglevel [DEBUG]       Set loglevel
   -m, --module TEXT            Run specific module
-  -f, --force                  Force download previously downloaded files
-  -g, --format [DNSMASQ|BIND]  Which DNS format to use
   --version                    Show the version and exit.
   --help                       Show this message and exit.
 

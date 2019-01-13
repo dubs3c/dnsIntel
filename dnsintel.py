@@ -1,21 +1,22 @@
-from dnsintel.util.config import Config
-from dnsintel.util.sql import SQL
-from dnsintel.util.util import reload_blacklist_file, restart_dnsmasq
+
 import logging
+
+from dnsintel.lib.config import Config
+from dnsintel.lib.sqlpeewee import init_database, MalwareDomains
+from dnsintel.lib.util import reload_blacklist_file, restart_dnsmasq
+
+import click
 import logzero
 from logzero import logger
-import click
 
 @click.group()
 @click.option("-l", "--loglevel", help="Set loglevel", type=click.Choice(['DEBUG']))
 @click.option("-m", "--module", help="Run specific module")
-@click.option("-f","--force", default=False, help="Force download previously downloaded files", is_flag=True)
-@click.option("-g", "--format", help="Which DNS format to use", required=True, type=click.Choice(['DNSMASQ', 'BIND']))
 @click.version_option(version="0.5", prog_name="dnsIntel")
 @click.pass_context
-def main(ctx, loglevel, module, force, format):
+def main(ctx, loglevel, module):
     """dnsIntel downloads and parses a list of domains from popular threat intel sources,
-then transforms the list into a blacklist which can be used by Dnsmasq and BIND.\n\n-== Made by @mjdubell ==-"""
+then transforms the list into a blacklist which can be used by Dnsmasq\n\n-== Made by @mjdubell ==-"""
     ctx.obj = Config()
 
     if loglevel == "DEBUG":
@@ -24,46 +25,33 @@ then transforms the list into a blacklist which can be used by Dnsmasq and BIND.
         logzero.loglevel(logging.INFO)
 
     ctx.obj.selected_module = module
-    ctx.obj.force = force
-    ctx.obj.FORMAT = format
 
 @main.command('run', short_help='Run the application')
 @click.pass_obj
 def run(ctx):
 
     click.secho("[*] Starting dnsIntel...", fg='green')
-    SQL().database_init()
+    init_database()
     sources = ctx.get_sources()
 
     if ctx.selected_module:
         if ctx.selected_module in ctx.load_modules():
             click.secho(f"[!] Running Module: {ctx.selected_module}...", fg="cyan")
             module = ctx.load_modules()[ctx.selected_module]
-            module.force = ctx.force
-            module.FORMAT = ctx.FORMAT
 
-            module.db.connect()
             module.run(sources[ctx.selected_module])
-            module.db.disconnect()
         else:
             click.secho(f"[ERROR] {ctx.selected_module} is not a valid module...", fg="red")
     else:
 
         for name, module in ctx.load_modules().items():
             click.secho(f"[!] Running Module: {name}...", fg="cyan")
-            module.FORMAT = ctx.FORMAT
-            module.force = ctx.force
 
-            module.db.connect()
             module.run(sources[name])
-            module.db.disconnect()
 
-    click.secho("[!] Reloading the blacklist file...", fg="green")
-    sql = SQL()
-    sql.connect()
-    domains = sql.get_all_domains(ctx.FORMAT)
-    reload_blacklist_file(domains)
-    sql.disconnect()
+    #click.secho("[!] Reloading the blacklist file...", fg="green")
+    #domains = [mw.domain for mw in MalwareDomains.select(MalwareDomains.domain)]
+    #reload_blacklist_file(domains)
 
     click.secho("[+] dnsIntel Completed", fg='yellow')
 
@@ -71,15 +59,10 @@ def run(ctx):
 @main.command("reload-blacklist", short_help="Reload the blacklist with domains in DB")
 @click.pass_obj
 def reload_blacklist(ctx):
-    if ctx.FORMAT:
-        click.secho("[!] Reloading the blacklist file...", fg="green")
-        sql = SQL()
-        sql.connect()
-        domains = sql.get_all_domains(ctx.FORMAT)
-        reload_blacklist_file(domains)
-        sql.disconnect()
-    else:
-        click.secho("[*] You need to specify which format you want, --format")
+    click.secho("[!] Reloading the blacklist file...", fg="green")
+    
+    domains = [mw.domain for mw in MalwareDomains.select(MalwareDomains.domain)]
+    reload_blacklist_file(domains)
 
     click.secho("[+] Reload Complete", fg='yellow')
 

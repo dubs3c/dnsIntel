@@ -6,8 +6,10 @@ import os
 import time
 import subprocess
 from typing import List, Dict, NamedTuple, Generator
-from logzero import logger
+
 from .config import Config
+from dnsintel.lib.sqlpeewee import Log
+from logzero import logger
 
 config = Config()
 
@@ -22,13 +24,22 @@ def download(url: str) -> NamedTuple:
     try:
         request = requests.get(url, timeout=3)
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Error downloading from {url}")
+        logger.debug(e)
     else:
         content = request.content
         sha256 = hashlib.sha256(content).hexdigest()
-        output_file = os.path.join(config.download_location, str(uuid.uuid4()) + ".txt")
-        with open(output_file, "wb") as f:
-            f.write(content)
+        output_file = os.path.join(config.download_location, sha256 + ".txt")
+        
+        if os.path.exists(output_file):
+            logger.debug(f"File with hash {sha256} already exists on disk")
+        else:
+            with open(output_file, "wb") as f:
+                f.write(content)
+
+        if not Log.select().where(Log.hash == sha256).exists():
+            Log.create(hash=sha256, path=output_file)
+
         return File(location=output_file, hash=sha256)
     return ()
 
@@ -66,16 +77,7 @@ def dnsmasq(domain: str) -> str:
 
 
 def bind(domain: str) -> str:
-    pass
-
-
-def append_to_blacklist(domains: List):
-    """
-    Appends a list of domains to the blacklist file
-    :param domains: List of DomainIntel objects
-    """
-    with open(config.BLACKLIST_FILE, "a") as f:
-        f.write("".join([x.domain_formated for x in domains]))
+    raise NotImplementedError
 
 
 def restart_dnsmasq():
@@ -91,15 +93,16 @@ def restart_dnsmasq():
     return status
 
 
-def reload_blacklist_file(generator: Generator):
+def reload_blacklist_file(domains: List):
     """
     Saves the content of the generator to the blacklist file. generator is a DomainIntel Object.
-    :param generator: DomainIntel generator object
+    :param domains: List of domains
     """
     if os.path.exists(config.BLACKLIST_FILE):
         os.remove(config.BLACKLIST_FILE)
-    for gen in generator:
-        append_to_blacklist(gen)
+    
+    with open(config.BLACKLIST_FILE, "a") as f:
+        f.write("".join([dnsmasq(domain) for domain in domains]))
 
 
 def restart_bind():
